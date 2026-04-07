@@ -1,0 +1,126 @@
+@import "tailwindcss";
+@import "@xyflow/react/dist/style.css";
+
+/* ===== Dify-inspired Theme Variables ===== */
+:root {
+  /* Primary */
+  --color-primary-50: #eff4ff;
+  --color-primary-100: #d1e0ff;
+  --color-primary-200: #b2caff;
+  --color-primary-300: #84adff;
+  --color-primary-400: #528bff;
+  --color-primary-500: #2970ff;
+  --color-primary-600: #155aef;
+  --color-primary-700: #004aeb;
+  --color-primary-800: #00359e;
+  --color-primary-900: #002266;
+
+  /* Gray */
+  --color-gray-25: #fcfcfd;
+  --color-gray-50: #f9fafb;
+  --color-gray-100: #f2f4f7;
+  --color-gray-200: #e9ebf0;
+  --color-gray-300: #d0d5dc;
+  --color-gray-400: #98a2b2;
+  --color-gray-500: #676f83;
+  --color-gray-600: #4a5468;
+  --color-gray-700: #354052;
+  --color-gray-800: #1d2939;
+  --color-gray-900: #101828;
+
+  /* Status */
+  --color-success-500: #17b26a;
+  --color-warning-500: #f79009;
+  --color-error-500: #f04438;
+  --color-info-500: #0ba5ec;
+
+  /* Component tokens */
+  --color-bg-page: var(--color-gray-50);
+  --color-bg-surface: #ffffff;
+  --color-bg-surface-secondary: var(--color-gray-25);
+  --color-text-primary: var(--color-gray-900);
+  --color-text-secondary: var(--color-gray-500);
+  --color-text-tertiary: var(--color-gray-400);
+  --color-border-default: var(--color-gray-200);
+  --color-border-subtle: var(--color-gray-100);
+
+  /* Shadows (Dify-style) */
+  --shadow-xs: 0px 1px 2px 0px rgba(16, 24, 40, 0.05);
+  --shadow-sm: 0px 1px 2px 0px rgba(16, 24, 40, 0.06), 0px 1px 3px 0px rgba(16, 24, 40, 0.1);
+  --shadow-md: 0px 2px 4px -2px rgba(16, 24, 40, 0.06), 0px 4px 8px -2px rgba(16, 24, 40, 0.1);
+  --shadow-lg: 0px 4px 6px -2px rgba(16, 24, 40, 0.03), 0px 12px 16px -4px rgba(16, 24, 40, 0.08);
+
+  /* Radius */
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+}
+
+@theme inline {
+  --color-background: var(--color-bg-page);
+  --color-foreground: var(--color-text-primary);
+  --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+body {
+  background: var(--color-bg-page);
+  color: var(--color-text-primary);
+  font-family: var(--font-sans);
+  margin: 0;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Typography */
+.text-title-xl { font-size: 24px; line-height: 32px; font-weight: 600; }
+.text-title-lg { font-size: 20px; line-height: 28px; font-weight: 600; }
+.text-title-md { font-size: 16px; line-height: 24px; font-weight: 600; }
+.text-title-sm { font-size: 14px; line-height: 20px; font-weight: 600; }
+.text-body-md { font-size: 14px; line-height: 20px; font-weight: 400; }
+.text-body-sm { font-size: 12px; line-height: 18px; font-weight: 400; }
+.text-body-xs { font-size: 11px; line-height: 16px; font-weight: 400; }
+
+/* ReactFlow */
+.react-flow__node { cursor: pointer; }
+.react-flow__attribution { display: none; }
+
+/* Hide mindmap handle dots — connections still work */
+.mindmap-handle {
+  width: 1px !important;
+  height: 1px !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  background: transparent !important;
+  border: none !important;
+  opacity: 0;
+}
+
+/* Smooth bezier edge color */
+.react-flow__edge-path {
+  stroke: var(--color-gray-300);
+  stroke-width: 2;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--color-gray-300); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--color-gray-400); }
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in { animation: fadeIn 0.2s ease-out; }
+
+@keyframes pulse-dot {
+  0%, 80%, 100% { opacity: 0; }
+  40% { opacity: 1; }
+}
+.typing-dot { animation: pulse-dot 1.4s infinite ease-in-out both; }
+.typing-dot:nth-child(1) { animation-delay: 0s; }
+.typing-dot:nth-child(2) { animation-delay: 0.2s; }
+.typing-dot:nth-child(3) { animation-delay: 0.4s; }
