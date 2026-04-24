@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { loginByCode, findUserByEmail, setSession } from "@/lib/use-auth";
@@ -17,10 +18,10 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
-  const handleCodeLogin = (e: React.FormEvent) => {
+  const handleCodeLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-    const user = loginByCode(code);
+    const user = await loginByCode(code);
     if (!user) {
       setError("安全码无效");
       return;
@@ -29,11 +30,10 @@ export default function LoginPage() {
     router.push("/documents");
   };
 
-  const handleEmailLogin = (e: React.FormEvent) => {
+  const handleEmailLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-    // TODO: 接入后端认证 API，目前仅校验用户是否存在
-    const user = findUserByEmail(email);
+    const user = await findUserByEmail(email);
     if (!user) {
       setError("该邮箱未注册");
       return;
@@ -46,11 +46,9 @@ export default function LoginPage() {
     <div className="flex min-h-screen items-center justify-center bg-[var(--color-bg-page)]">
       <div className="flex gap-8 items-start">
         {/* Login card */}
-        <div className="w-full max-w-sm rounded-[var(--radius-xl)] bg-[var(--color-bg-surface)] p-8 shadow-[var(--shadow-lg)]">
+        <div className="w-full max-w-md rounded-[var(--radius-xl)] bg-[var(--color-bg-surface)] p-10 shadow-[var(--shadow-lg)]">
         <div className="mb-6 flex flex-col items-center">
-          <svg className="mb-3 h-10 w-10 text-[var(--color-primary-600)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
-          </svg>
+          <Image src="/LmindLogo.svg" alt="Lmind Logo" width={48} height={48} className="mb-3" />
           <h1 className="text-title-xl text-[var(--color-text-primary)]">登录 Lmind</h1>
           <p className="mt-1 text-body-sm text-[var(--color-text-tertiary)]">AI 驱动的智能思维导图</p>
         </div>
@@ -83,7 +81,7 @@ export default function LoginPage() {
         </div>
 
         {mode === "code" ? (
-          <form onSubmit={handleCodeLogin} className="flex flex-col gap-4">
+          <form onSubmit={handleCodeLogin} className="flex flex-col gap-5">
             <div>
               <label className="text-body-sm font-medium text-[var(--color-text-primary)] mb-1.5 block">安全登录码</label>
               <Input
@@ -99,7 +97,7 @@ export default function LoginPage() {
             <Button type="submit" className="w-full mt-2" size="lg">登录</Button>
           </form>
         ) : (
-          <form onSubmit={handleEmailLogin} className="flex flex-col gap-4">
+          <form onSubmit={handleEmailLogin} className="flex flex-col gap-5">
             <div>
               <label className="text-body-sm font-medium text-[var(--color-text-primary)] mb-1.5 block">邮箱</label>
               <Input type="email" placeholder="your@email.com" value={email} onChange={(e) => setEmail(e.target.value)} required />
@@ -119,7 +117,7 @@ export default function LoginPage() {
         </div>
 
       {/* Usage tutorial */}
-      <div className="hidden lg:block w-80 rounded-[var(--radius-xl)] bg-[var(--color-bg-surface)] p-6 shadow-[var(--shadow-lg)]">
+      <div className="hidden lg:block w-96 rounded-[var(--radius-xl)] bg-[var(--color-bg-surface)] p-8 shadow-[var(--shadow-lg)]">
         <h2 className="text-title-sm text-[var(--color-text-primary)] mb-4 flex items-center gap-2">
           <svg className="h-4 w-4 text-[var(--color-primary-600)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />

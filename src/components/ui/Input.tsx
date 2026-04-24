@@ -12,7 +12,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
     <input
       ref={ref}
       className={cn(
-        "h-9 w-full rounded-[var(--radius-md)] border bg-[var(--color-bg-surface)] px-3 text-sm text-[var(--color-text-primary)] outline-none transition-colors",
+        "h-11 w-full rounded-[var(--radius-md)] border bg-[var(--color-bg-surface)] px-3.5 text-base text-[var(--color-text-primary)] outline-none transition-colors",
         "placeholder:text-[var(--color-text-tertiary)]",
         error
           ? "border-[var(--color-error-500)] focus:border-[var(--color-error-500)]"

@@ -1,20 +1,26 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { registerUser, setSession } from "@/lib/use-auth";
 
 export default function RegisterPage() {
   const router = useRouter();
+  const [mounted, setMounted] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [securityCode, setSecurityCode] = useState("");
   const [error, setError] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     if (password !== confirmPassword) {
@@ -22,7 +28,7 @@ export default function RegisterPage() {
       return;
     }
     try {
-      const user = registerUser(email, securityCode || undefined);
+      const user = await registerUser(email, securityCode || undefined);
       setSession(user);
       alert(`注册成功！您的安全登录码: ${user.code}\n请牢记此码，可直接用它登录。`);
       router.push("/documents");
@@ -33,25 +39,23 @@ export default function RegisterPage() {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-[var(--color-bg-page)]">
-      <div className="w-full max-w-sm rounded-[var(--radius-xl)] bg-[var(--color-bg-surface)] p-8 shadow-[var(--shadow-lg)]">
+      <div className="w-full max-w-md rounded-[var(--radius-xl)] bg-[var(--color-bg-surface)] p-10 shadow-[var(--shadow-lg)]">
         <div className="mb-6 flex flex-col items-center">
-          <svg className="mb-3 h-10 w-10 text-[var(--color-primary-600)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
-          </svg>
+          <Image src="/LmindLogo.svg" alt="Lmind Logo" width={48} height={48} className="mb-3" />
           <h1 className="text-title-xl text-[var(--color-text-primary)]">注册 Lmind</h1>
         </div>
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+        <form onSubmit={handleSubmit} className="flex flex-col gap-5">
           <div>
             <label className="text-body-sm font-medium text-[var(--color-text-primary)] mb-1.5 block">邮箱</label>
             <Input type="email" placeholder="your@email.com" value={email} onChange={(e) => setEmail(e.target.value)} required />
           </div>
           <div>
             <label className="text-body-sm font-medium text-[var(--color-text-primary)] mb-1.5 block">密码</label>
-            <Input type="password" placeholder="设置密码" value={password} onChange={(e) => setPassword(e.target.value)} required />
+            <Input type={mounted ? "password" : "text"} placeholder="设置密码" value={password} onChange={(e) => setPassword(e.target.value)} required />
           </div>
           <div>
             <label className="text-body-sm font-medium text-[var(--color-text-primary)] mb-1.5 block">确认密码</label>
-            <Input type="password" placeholder="再次输入密码" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required />
+            <Input type={mounted ? "password" : "text"} placeholder="再次输入密码" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required />
           </div>
           <div>
             <label className="text-body-sm font-medium text-[var(--color-text-primary)] mb-1.5 block">安全登录码（选填）</label>

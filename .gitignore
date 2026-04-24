@@ -39,3 +39,13 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# database & config
+/data
+*.db
+*.sqlite
+*.sqlite3
+
+# build artifacts
+.next.zip
+package-lock.json

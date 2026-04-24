@@ -9,6 +9,8 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import SettingsModal from "@/components/ui/SettingsModal";
 import { useAuth } from "@/lib/use-auth";
+import Image from "next/image";
+import MindMapThumbnail from "@/components/ui/MindMapThumbnail";
 
 export default function DocumentsPage() {
   const router = useRouter();
@@ -72,9 +74,7 @@ export default function DocumentsPage() {
       <header className="border-b border-[var(--color-border-default)] bg-[var(--color-bg-surface)] px-6 py-3">
         <div className="mx-auto flex max-w-5xl items-center justify-between">
           <div className="flex items-center gap-3">
-            <svg className="h-6 w-6 text-[var(--color-primary-600)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
-            </svg>
+            <Image src="/LmindLogo.svg" alt="Lmind Logo" width={28} height={28} />
             <h1 className="text-title-lg text-[var(--color-text-primary)]">Lmind</h1>
           </div>
           <div className="flex items-center gap-2">
@@ -149,10 +149,8 @@ export default function DocumentsPage() {
                 onClick={() => router.push(`/editor/${doc.id}`)}
                 className="group cursor-pointer rounded-[var(--radius-xl)] border border-[var(--color-border-default)] bg-[var(--color-bg-surface)] p-5 shadow-[var(--shadow-xs)] transition-all hover:shadow-[var(--shadow-md)] hover:border-[var(--color-primary-200)]"
               >
-                <div className="mb-3 flex h-24 items-center justify-center rounded-[var(--radius-md)] bg-[var(--color-gray-50)]">
-                  <svg className="h-8 w-8 text-[var(--color-primary-400)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
-                  </svg>
+                <div className="mb-3 flex h-32 items-center justify-center rounded-[var(--radius-md)] bg-[var(--color-gray-50)] overflow-hidden p-2">
+                  <MindMapThumbnail rootNode={doc.rootNode} className="h-full w-full" />
                 </div>
                 <h3 className="text-title-sm text-[var(--color-text-primary)] truncate">
                   {doc.title}

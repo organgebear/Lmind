@@ -200,10 +200,10 @@ export default function MindMapCanvas({ docId }: MindMapCanvasProps) {
     return () => document.removeEventListener("keydown", handler);
   }, [nodes, addChild]);
 
-  /** 左键单击节点弹出操作菜单 */
+  /** 左键单击节点：关闭菜单（如果打开的话） */
   const onNodeClick = useCallback(
-    (event: React.MouseEvent, node: Node) => {
-      setContextMenu({ x: event.clientX, y: event.clientY, nodeId: node.id });
+    (_event: React.MouseEvent, _node: Node) => {
+      setContextMenu(null);
     },
     []
   );

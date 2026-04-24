@@ -19,9 +19,9 @@ const buttonVariants = cva(
           "bg-[var(--color-error-500)] text-white border border-transparent hover:bg-[#d92d20]",
       },
       size: {
-        sm: "h-7 px-2.5 text-xs rounded-[var(--radius-sm)]",
-        md: "h-8 px-3 text-sm rounded-[var(--radius-md)]",
-        lg: "h-9 px-4 text-sm rounded-[var(--radius-md)]",
+        sm: "h-8 px-3 text-sm rounded-[var(--radius-sm)]",
+        md: "h-10 px-4 text-base rounded-[var(--radius-md)]",
+        lg: "h-11 px-5 text-base rounded-[var(--radius-md)]",
       },
     },
     defaultVariants: {

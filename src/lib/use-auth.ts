@@ -10,46 +10,9 @@ export interface LmindUser {
   codeEnabled: boolean; // 安全码登录是否启用
 }
 
-/** 获取所有已注册用户（兼容旧数据） */
-function getUsers(): LmindUser[] {
-  try {
-    const raw = localStorage.getItem("lmind-users");
-    if (!raw) return [];
-    const users = JSON.parse(raw) as LmindUser[];
-    // 迁移：旧用户可能没有 codeEnabled 字段
-    let migrated = false;
-    for (const u of users) {
-      if (u.codeEnabled === undefined) {
-        u.codeEnabled = !!u.code;
-        migrated = true;
-      }
-      if (!u.code) {
-        u.code = generateCode();
-        u.codeEnabled = true;
-        migrated = true;
-      }
-    }
-    if (migrated) saveUsers(users);
-    return users;
-  } catch {
-    return [];
-  }
-}
-
-/** 保存用户列表 */
-function saveUsers(users: LmindUser[]) {
-  localStorage.setItem("lmind-users", JSON.stringify(users));
-}
-
 /** 生成 6 位数字安全码 */
 export function generateCode(): string {
   return Math.floor(100000 + Math.random() * 900000).toString();
-}
-
-/** 检查安全码是否唯一 */
-export function isCodeUnique(code: string, excludeEmail?: string): boolean {
-  const users = getUsers();
-  return !users.some((u) => u.code === code && u.email !== excludeEmail);
 }
 
 /** 写入会话 */
@@ -57,73 +20,76 @@ export function setSession(user: LmindUser) {
   localStorage.setItem("lmind-session", JSON.stringify(user));
 }
 
-/** 注册新用户（customCode 留空则自动生成） */
-export function registerUser(email: string, customCode?: string): LmindUser {
-  const users = getUsers();
-  if (users.find((u) => u.email === email)) throw new Error("该邮箱已注册");
-
-  let code: string;
-  if (customCode) {
-    if (!isCodeUnique(customCode)) throw new Error("该安全码已被使用");
-    code = customCode;
-  } else {
-    do { code = generateCode(); } while (!isCodeUnique(code));
+async function parseJsonSafely(res: Response) {
+  const text = await res.text();
+  try {
+    return text ? JSON.parse(text) : {};
+  } catch {
+    throw new Error(text.startsWith("<!DOCTYPE") ? "服务器返回了错误页面，请查看终端日志" : "服务器返回了无效响应");
   }
+}
 
-  const user: LmindUser = { email, code, codeEnabled: true };
-  users.push(user);
-  saveUsers(users);
-  return user;
+/** 注册新用户（customCode 留空则自动生成） */
+export async function registerUser(email: string, customCode?: string): Promise<LmindUser> {
+  const code = customCode || generateCode();
+  const res = await fetch("/api/auth/register", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, code }),
+  });
+  const data = await parseJsonSafely(res);
+  if (!res.ok) throw new Error(data.error || "注册失败");
+  return data as LmindUser;
 }
 
 /** 修改用户安全码 */
-export function updateUserCode(email: string, newCode: string): LmindUser {
-  if (!newCode.trim()) throw new Error("安全码不能为空");
-  if (!isCodeUnique(newCode, email)) throw new Error("该安全码已被使用");
-  const users = getUsers();
-  const user = users.find((u) => u.email === email);
-  if (!user) throw new Error("用户不存在");
-  user.code = newCode;
-  saveUsers(users);
-  // 同步更新 session
-  try {
-    const session = localStorage.getItem("lmind-session");
-    if (session) {
-      const parsed = JSON.parse(session);
-      if (parsed.email === email) setSession(user);
-    }
-  } catch { /* ignore */ }
-  return user;
+export async function updateUserCode(email: string, newCode: string): Promise<LmindUser> {
+  const res = await fetch("/api/auth/update-code", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, code: newCode }),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || "更新失败");
+  const session = localStorage.getItem("lmind-session");
+  if (session && JSON.parse(session).email === email) setSession(data);
+  return data as LmindUser;
 }
 
 /** 用邮箱查找用户（用于邮箱登录） */
-export function findUserByEmail(email: string): LmindUser | null {
-  const users = getUsers();
-  return users.find((u) => u.email === email) ?? null;
+export async function findUserByEmail(email: string): Promise<LmindUser | null> {
+  const res = await fetch("/api/auth/login", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ type: "email", value: email }),
+  });
+  if (!res.ok) return null;
+  return res.json();
 }
 
 /** 用安全码登录（仅匹配已启用安全码的用户） */
-export function loginByCode(code: string): LmindUser | null {
-  const users = getUsers();
-  return users.find((u) => u.code === code && u.codeEnabled) ?? null;
+export async function loginByCode(code: string): Promise<LmindUser | null> {
+  const res = await fetch("/api/auth/login", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ type: "code", value: code }),
+  });
+  if (!res.ok) return null;
+  return res.json();
 }
 
 /** 切换安全码登录开关 */
-export function toggleCodeEnabled(email: string, enabled: boolean): LmindUser {
-  const users = getUsers();
-  const user = users.find((u) => u.email === email);
-  if (!user) throw new Error("用户不存在");
-  user.codeEnabled = enabled;
-  saveUsers(users);
-  // 同步更新 session
-  try {
-    const session = localStorage.getItem("lmind-session");
-    if (session) {
-      const parsed = JSON.parse(session);
-      if (parsed.email === email) setSession(user);
-    }
-  } catch { /* ignore */ }
-  return user;
+export async function toggleCodeEnabled(email: string, enabled: boolean): Promise<LmindUser> {
+  const res = await fetch("/api/auth/toggle-code", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, enabled }),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || "操作失败");
+  const session = localStorage.getItem("lmind-session");
+  if (session && JSON.parse(session).email === email) setSession(data);
+  return data as LmindUser;
 }
 
 export function useAuth() {

@@ -4,6 +4,9 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "Lmind - AI 思维导图",
   description: "AI 驱动的智能思维导图应用",
+  icons: {
+    icon: "/LmindLogo.svg",
+  },
 };
 
 export default function RootLayout({
