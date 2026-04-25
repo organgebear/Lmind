@@ -1,6 +1,13 @@
 # Lmind 本地开发 Docker 环境
 # 包含：应用(Next.js) + MySQL + Redis
 # 用法：docker compose up -d
+#
+# 安全提示：
+#   - 这是本地开发配置文件，默认密码仅供本地使用
+#   - 如需自定义密码，创建 .env 文件并设置对应变量：
+#        DB_PASS=your_password
+#        MYSQL_ROOT_PASSWORD=your_root_password
+#        REDIS_PASS=your_redis_password
 
 services:
   # ---------- Next.js 应用 ----------
@@ -17,8 +24,8 @@ services:
       DB_PORT: 3306
       DB_NAME: Lmind
       DB_USER: Lmind
-      DB_PASS: Lmind24703
-      REDIS_URL: redis://:redis6379@redis:6379
+      DB_PASS: ${DB_PASS:-Lmind24703}
+      REDIS_URL: redis://:${REDIS_PASS:-redis6379}@redis:6379
     depends_on:
       mysql:
         condition: service_healthy
@@ -33,10 +40,10 @@ services:
     container_name: lmind-mysql
     restart: unless-stopped
     environment:
-      MYSQL_ROOT_PASSWORD: mysql_8fAnRP
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-mysql_8fAnRP}
       MYSQL_DATABASE: Lmind
       MYSQL_USER: Lmind
-      MYSQL_PASSWORD: Lmind24703
+      MYSQL_PASSWORD: ${DB_PASS:-Lmind24703}
     ports:
       - "24703:3306"
     volumes:
@@ -55,13 +62,13 @@ services:
     image: redis:8-alpine
     container_name: lmind-redis
     restart: unless-stopped
-    command: redis-server --requirepass redis6379
+    command: redis-server --requirepass ${REDIS_PASS:-redis6379}
     ports:
       - "24704:6379"
     volumes:
       - redis_data:/data
     healthcheck:
-      test: ["CMD", "redis-cli", "-a", "redis6379", "ping"]
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASS:-redis6379}", "ping"]
       interval: 10s
       timeout: 5s
       retries: 5

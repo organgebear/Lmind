@@ -14,7 +14,7 @@ export default function SetupPage() {
   const router = useRouter();
   const [dbType, setDbType] = useState<DbType>("sqlite");
   const [sqlitePath, setSqlitePath] = useState("./data/lmind.db");
-  const [mysql, setMysql] = useState({ host: "mysql", port: "3306", database: "Lmind", user: "Lmind", password: "Lmind24703" });
+  const [mysql, setMysql] = useState({ host: "mysql", port: "3306", database: "Lmind", user: "Lmind", password: "" });
   const [redisUrl, setRedisUrl] = useState("");
   const [status, setStatus] = useState<Status>("idle");
   const [msg, setMsg] = useState("");

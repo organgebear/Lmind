@@ -50,8 +50,8 @@ pnpm dev
 ```
 
 启动后在 Setup 页面填写：
-- **MySQL**: host=`localhost`, port=`24703`, database=`Lmind`, user=`Lmind`, password=`Lmind24703`
-- **Redis**: `redis://:redis6379@localhost:24704`
+- **MySQL**: host=`localhost`, port=`24703`, database=`Lmind`, user=`Lmind`, password=`your_password`
+- **Redis**: `redis://:your_redis_password@localhost:24704`
 
 ## 管理员系统
 
@@ -115,8 +115,8 @@ docker run -d -p 24701:24701 \
   -e DB_PORT=3306 \
   -e DB_NAME=Lmind \
   -e DB_USER=Lmind \
-  -e DB_PASS=Lmind24703 \
-  -e REDIS_URL=redis://:redis6379@your-redis-host:6379 \
+  -e DB_PASS=your_db_password \
+  -e REDIS_URL=redis://:your_redis_password@your-redis-host:6379 \
   --name lmind lmind
 ```
 

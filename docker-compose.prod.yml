@@ -1,6 +1,12 @@
-# Lmind 生产部署 - 服务器使用
+# Lmind 生产部署
 # 只部署应用容器，连接服务器已有的 MySQL 和 Redis
-# 用法：docker compose -f docker-compose.prod.yml up -d
+# 用法：cp .env.example .env（填写实际值），然后：
+#   docker compose -f docker-compose.prod.yml --env-file .env up -d
+#
+# 安全提示：
+#   - 请勿在此文件中硬编码真实密码
+#   - 将数据库和 Redis 密码填入 .env 文件（已在 .gitignore 中）
+#   - .env 文件示例请参考 .env.example
 
 services:
   lmind:
@@ -9,15 +15,7 @@ services:
     restart: always
     ports:
       - "24701:24701"
-    environment:
-      INITIALIZED: "true"
-      DB_TYPE: mysql
-      DB_HOST: 1Panel-mysql-Spll
-      DB_PORT: 3306
-      DB_NAME: Lmind
-      DB_USER: root
-      DB_PASS: mysql_8fAnRP
-      REDIS_URL: redis://:redis6379@1Panel-redis-c12G:6379
+    env_file: .env
     volumes:
       - lmind_data:/app/data
     networks:
