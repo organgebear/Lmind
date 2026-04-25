@@ -44,9 +44,9 @@ export default function MindMapCanvas({ docId }: MindMapCanvasProps) {
   const [previewImage, setPreviewImage] = useState<string | null>(null);
 
   const updateNodeInTree = useCallback(
-    (root: MindMapNode, nodeId: string, updater: (n: MindMapNode) => MindMapNode): MindMapNode => {
+    function update(root: MindMapNode, nodeId: string, updater: (n: MindMapNode) => MindMapNode): MindMapNode {
       if (root.id === nodeId) return updater(root);
-      return { ...root, children: root.children.map((c) => updateNodeInTree(c, nodeId, updater)) };
+      return { ...root, children: root.children.map((c) => update(c, nodeId, updater)) };
     },
     []
   );
@@ -203,6 +203,7 @@ export default function MindMapCanvas({ docId }: MindMapCanvasProps) {
   /** 左键单击节点：关闭菜单（如果打开的话） */
   const onNodeClick = useCallback(
     (_event: React.MouseEvent, _node: Node) => {
+      void _event; void _node;
       setContextMenu(null);
     },
     []

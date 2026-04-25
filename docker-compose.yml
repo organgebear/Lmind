@@ -1,0 +1,72 @@
+# Lmind 本地开发 Docker 环境
+# 包含：应用(Next.js) + MySQL + Redis
+# 用法：docker compose up -d
+
+services:
+  # ---------- Next.js 应用 ----------
+  app:
+    build: .
+    container_name: lmind-app
+    restart: unless-stopped
+    ports:
+      - "24701:24701"
+    environment:
+      INITIALIZED: "false"
+      DB_TYPE: mysql
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_NAME: Lmind
+      DB_USER: Lmind
+      DB_PASS: Lmind24703
+      REDIS_URL: redis://:redis6379@redis:6379
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - app_data:/app/data
+
+  # ---------- MySQL 8.4 ----------
+  mysql:
+    image: mysql:8.4
+    container_name: lmind-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: mysql_8fAnRP
+      MYSQL_DATABASE: Lmind
+      MYSQL_USER: Lmind
+      MYSQL_PASSWORD: Lmind24703
+    ports:
+      - "24703:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ---------- Redis ----------
+  redis:
+    image: redis:8-alpine
+    container_name: lmind-redis
+    restart: unless-stopped
+    command: redis-server --requirepass redis6379
+    ports:
+      - "24704:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "redis6379", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  app_data:
+  mysql_data:
+  redis_data:

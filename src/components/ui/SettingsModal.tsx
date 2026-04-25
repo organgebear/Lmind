@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { useAIStore } from "@/stores/ai-store";
 import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
@@ -25,6 +26,7 @@ interface SettingsModalProps {
 }
 
 export default function SettingsModal({ open, onClose, user }: SettingsModalProps) {
+  const router = useRouter();
   const { settings, setActiveProvider, updateProviderConfig } = useAIStore();
   const [activeTab, setActiveTab] = useState<AIProvider>(settings.activeProvider);
   const [settingsTab, setSettingsTab] = useState<SettingsTab>("ai");
@@ -33,22 +35,22 @@ export default function SettingsModal({ open, onClose, user }: SettingsModalProp
   const [codeSuccess, setCodeSuccess] = useState("");
   const [codeEnabled, setCodeEnabled] = useState(user?.codeEnabled ?? true);
 
-  const handleToggleCode = () => {
+  const handleToggleCode = async () => {
     if (!user) return;
     try {
-      const updated = toggleCodeEnabled(user.email, !codeEnabled);
+      const updated = await toggleCodeEnabled(user.email, !codeEnabled);
       setCodeEnabled(updated.codeEnabled);
     } catch { /* ignore */ }
   };
 
   const config = settings.providers[activeTab];
 
-  const handleUpdateCode = () => {
+  const handleUpdateCode = async () => {
     if (!user) return;
     setCodeError("");
     setCodeSuccess("");
     try {
-      const updated = updateUserCode(user.email, newCode);
+      const updated = await updateUserCode(user.email, newCode);
       setCodeSuccess(`安全码已更新为: ${updated.code}`);
       setNewCode("");
     } catch (err) {
@@ -210,7 +212,16 @@ export default function SettingsModal({ open, onClose, user }: SettingsModalProp
           ) : (
             <p className="text-body-sm text-[var(--color-text-tertiary)]">请先登录</p>
           )}
-          <div className="mt-6 flex justify-end">
+          <div className="mt-6 flex justify-between items-center">
+            {user?.role === "admin" && (
+              <button
+                onClick={() => { onClose(); router.push("/admin"); }}
+                className="text-body-sm text-purple-600 hover:text-purple-700 font-medium"
+              >
+                管理面板 →
+              </button>
+            )}
+            <div className="flex-1" />
             <Button onClick={onClose}>完成</Button>
           </div>
         </div>

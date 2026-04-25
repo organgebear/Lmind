@@ -1,5 +1,12 @@
 node_modules
 .next
 .git
-*.md
 .env*
+data
+*.db
+*.sqlite
+*.sqlite3
+.next.zip
+docker-compose*.yml
+.claude
+._*

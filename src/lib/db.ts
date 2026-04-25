@@ -1,6 +1,7 @@
 import "server-only";
 import { readConfig } from "./config";
 import { createSqliteDb, type Db } from "./db-sqlite";
+import { createMysqlDb } from "./db-mysql";
 
 let _db: Db | null = null;
 
@@ -9,8 +10,16 @@ export function getDb(): Db {
     const cfg = readConfig();
     if (cfg.db.type === "sqlite") {
       _db = createSqliteDb(cfg.db.path);
+    } else if (cfg.db.type === "mysql") {
+      _db = createMysqlDb({
+        host: cfg.db.host,
+        port: cfg.db.port,
+        database: cfg.db.database,
+        user: cfg.db.user,
+        password: cfg.db.password,
+      });
     } else {
-      throw new Error("当前环境暂不支持 MySQL，请先使用 SQLite 完成初始化");
+      throw new Error("不支持的数据库类型");
     }
   }
   return _db;

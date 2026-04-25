@@ -9,8 +9,8 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import SettingsModal from "@/components/ui/SettingsModal";
 import { useAuth } from "@/lib/use-auth";
-import Image from "next/image";
 import MindMapThumbnail from "@/components/ui/MindMapThumbnail";
+import Logo from "@/components/ui/Logo";
 
 export default function DocumentsPage() {
   const router = useRouter();
@@ -74,7 +74,7 @@ export default function DocumentsPage() {
       <header className="border-b border-[var(--color-border-default)] bg-[var(--color-bg-surface)] px-6 py-3">
         <div className="mx-auto flex max-w-5xl items-center justify-between">
           <div className="flex items-center gap-3">
-            <Image src="/LmindLogo.svg" alt="Lmind Logo" width={28} height={28} />
+            <Logo size={28} />
             <h1 className="text-title-lg text-[var(--color-text-primary)]">Lmind</h1>
           </div>
           <div className="flex items-center gap-2">

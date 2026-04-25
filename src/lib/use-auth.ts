@@ -6,8 +6,10 @@ import { useAIStore } from "@/stores/ai-store";
 
 export interface LmindUser {
   email: string;
-  code: string; // 6位安全登录码
-  codeEnabled: boolean; // 安全码登录是否启用
+  code: string;
+  codeEnabled: boolean;
+  role: string;
+  username?: string | null;
 }
 
 /** 生成 6 位数字安全码 */
@@ -18,6 +20,18 @@ export function generateCode(): string {
 /** 写入会话 */
 export function setSession(user: LmindUser) {
   localStorage.setItem("lmind-session", JSON.stringify(user));
+}
+
+function readSession(): LmindUser | null {
+  if (typeof window === "undefined") return null;
+  const stored = localStorage.getItem("lmind-session");
+  if (!stored) return null;
+  try {
+    return JSON.parse(stored) as LmindUser;
+  } catch {
+    localStorage.removeItem("lmind-session");
+    return null;
+  }
 }
 
 async function parseJsonSafely(res: Response) {
@@ -67,6 +81,19 @@ export async function findUserByEmail(email: string): Promise<LmindUser | null> 
   return res.json();
 }
 
+/** 统一密码登录：identifier 可以是邮箱或用户名 */
+export async function loginByIdentifier(identifier: string, password: string, setSessionFn?: (user: LmindUser) => void): Promise<LmindUser | null> {
+  const res = await fetch("/api/auth/login", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ type: "password", identifier, password }),
+  });
+  if (!res.ok) return null;
+  const user = await res.json();
+  if (setSessionFn) setSessionFn(user);
+  return user;
+}
+
 /** 用安全码登录（仅匹配已启用安全码的用户） */
 export async function loginByCode(code: string): Promise<LmindUser | null> {
   const res = await fetch("/api/auth/login", {
@@ -94,26 +121,30 @@ export async function toggleCodeEnabled(email: string, enabled: boolean): Promis
 
 export function useAuth() {
   const router = useRouter();
+  const pathname = typeof window !== "undefined" ? window.location.pathname : "";
   const switchUser = useAIStore((s) => s.switchUser);
-  const [user, setUser] = useState<LmindUser | null>(null);
+  const fetchGlobalSettings = useAIStore((s) => s.fetchGlobalSettings);
+  const [user] = useState<LmindUser | null>(readSession);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const stored = localStorage.getItem("lmind-session");
-    if (stored) {
-      try {
-        const parsed = JSON.parse(stored) as LmindUser;
-        setUser(parsed);
-        switchUser(parsed.email);
-      } catch {
-        localStorage.removeItem("lmind-session");
-        router.replace("/login");
-      }
-    } else {
+    if (!user) {
       router.replace("/login");
+    } else {
+      switchUser(user.email);
+      fetchGlobalSettings();
+      // admin redirect
+      if (user.role === "admin" && !pathname.startsWith("/admin") && pathname !== "/login") {
+        router.replace("/admin");
+      }
+      // non-admin trying to access /admin → redirect
+      if (user.role !== "admin" && pathname.startsWith("/admin")) {
+        router.replace("/documents");
+      }
     }
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setLoading(false);
-  }, [router, switchUser]);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const logout = () => {
     switchUser(null);

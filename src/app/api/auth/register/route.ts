@@ -7,8 +7,13 @@ export async function POST(req: NextRequest) {
     const db = getDb();
     if (await db.findByEmail(email)) return NextResponse.json({ error: "该邮箱已注册" }, { status: 400 });
     if (await db.codeExists(code)) return NextResponse.json({ error: "该安全码已被使用" }, { status: 400 });
-    await db.insert({ email, code, code_enabled: 1 });
-    return NextResponse.json({ email, code, codeEnabled: true });
+
+    // first registered user becomes admin
+    const allUsers = await db.findAllUsers();
+    const role = allUsers.length === 0 ? "admin" : "user";
+
+    await db.insert({ email, code, code_enabled: 1, role });
+    return NextResponse.json({ email, code, codeEnabled: true, role });
   } catch (e: unknown) {
     return NextResponse.json({ error: (e as Error).message || "注册失败" }, { status: 500 });
   }

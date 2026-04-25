@@ -17,6 +17,7 @@
     "clsx": "^2.1.1",
     "elkjs": "^0.11.0",
     "i18next": "^25.8.11",
+    "ioredis": "^5.10.1",
     "jotai": "^2.18.0",
     "jszip": "^3.10.1",
     "ky": "^1.14.3",
@@ -39,6 +40,8 @@
     "typescript": "^5"
   },
   "pnpm": {
-    "onlyBuiltDependencies": ["better-sqlite3"]
+    "onlyBuiltDependencies": [
+      "better-sqlite3"
+    ]
   }
 }

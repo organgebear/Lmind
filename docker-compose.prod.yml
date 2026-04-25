@@ -1,0 +1,31 @@
+# Lmind 生产部署 - 服务器使用
+# 只部署应用容器，连接服务器已有的 MySQL 和 Redis
+# 用法：docker compose -f docker-compose.prod.yml up -d
+
+services:
+  lmind:
+    image: lmind:latest
+    container_name: lmind
+    restart: always
+    ports:
+      - "24701:24701"
+    environment:
+      INITIALIZED: "true"
+      DB_TYPE: mysql
+      DB_HOST: 1Panel-mysql-Spll
+      DB_PORT: 3306
+      DB_NAME: Lmind
+      DB_USER: root
+      DB_PASS: mysql_8fAnRP
+      REDIS_URL: redis://:redis6379@1Panel-redis-c12G:6379
+    volumes:
+      - lmind_data:/app/data
+    networks:
+      - 1panel-network
+
+volumes:
+  lmind_data:
+
+networks:
+  1panel-network:
+    external: true

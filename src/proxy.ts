@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { isConfigured } from "./lib/config";
 
-const PUBLIC_PREFIXES = ["/setup", "/api/setup", "/_next", "/favicon.ico"];
+const PUBLIC_PREFIXES = ["/setup", "/api/setup", "/_next", "/favicon.ico", "/LmindLogo.svg"];
 
 export function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl;

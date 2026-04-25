@@ -17,6 +17,8 @@ interface AIState {
   userSettings: Record<string, AISettings>;
   /** 当前用户 ID */
   currentUserId: string | null;
+  /** 全局 AI 默认设置（服务器端配置，作为 fallback） */
+  globalSettings: AISettings | null;
 
   togglePanel: () => void;
   setPanelOpen: (open: boolean) => void;
@@ -31,6 +33,8 @@ interface AIState {
   getActiveConfig: () => AIProviderConfig;
   /** 切换当前用户，加载该用户的 AI 设置 */
   switchUser: (userId: string | null) => void;
+  /** 从服务器加载全局 AI 默认设置 */
+  fetchGlobalSettings: () => Promise<void>;
 }
 
 export const useAIStore = create<AIState>()(
@@ -44,6 +48,7 @@ export const useAIStore = create<AIState>()(
       panelWidth: 380,
       userSettings: {},
       currentUserId: null,
+      globalSettings: null,
 
       togglePanel: () => set((s) => ({ panelOpen: !s.panelOpen })),
       setPanelOpen: (open) => set({ panelOpen: open }),
@@ -92,8 +97,24 @@ export const useAIStore = create<AIState>()(
       setPanelWidth: (width) => set({ panelWidth: width }),
 
       getActiveConfig: () => {
-        const { settings } = get();
-        return settings.providers[settings.activeProvider];
+        const { settings, globalSettings } = get();
+        const activeProvider = settings.activeProvider;
+        const userConfig = settings.providers[activeProvider];
+        // if user has configured their own API key, use it
+        if (userConfig.apiKey) return userConfig;
+        // fallback to global settings
+        if (globalSettings) {
+          const globalProvider = globalSettings.activeProvider;
+          const globalConfig = globalSettings.providers[activeProvider];
+          // use global config for the user's active provider if available
+          if (globalConfig?.apiKey) return { ...globalConfig, apiKey: globalConfig.apiKey };
+          // if user's active provider has no global config, try the global active provider
+          if (globalProvider !== activeProvider) {
+            const globalActiveConfig = globalSettings.providers[globalProvider];
+            if (globalActiveConfig?.apiKey) return { ...globalActiveConfig, apiKey: globalActiveConfig.apiKey };
+          }
+        }
+        return userConfig;
       },
 
       switchUser: (userId) => {
@@ -102,6 +123,29 @@ export const useAIStore = create<AIState>()(
           ? userSettings[userId]
           : DEFAULT_AI_SETTINGS;
         set({ currentUserId: userId, settings, messages: [] });
+      },
+
+      fetchGlobalSettings: async () => {
+        try {
+          const res = await fetch("/api/settings/global");
+          if (!res.ok) return;
+          const data = await res.json();
+          const globalSettings: AISettings = {
+            activeProvider: data.activeProvider || DEFAULT_AI_SETTINGS.activeProvider,
+            providers: { ...DEFAULT_AI_SETTINGS.providers },
+          };
+          for (const p of ["deepseek", "chatgpt", "qwen"] as AIProvider[]) {
+            if (data[p]) {
+              try {
+                const cfg = typeof data[p] === "string" ? JSON.parse(data[p]) : data[p];
+                if (cfg.apiKey) globalSettings.providers[p].apiKey = cfg.apiKey;
+                if (cfg.model) globalSettings.providers[p].model = cfg.model;
+                if (cfg.baseUrl) globalSettings.providers[p].baseUrl = cfg.baseUrl;
+              } catch { /* ignore */ }
+            }
+          }
+          set({ globalSettings });
+        } catch { /* ignore */ }
       },
     }),
     {

@@ -1,24 +1,21 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useSyncExternalStore, useState } from "react";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
+import Logo from "@/components/ui/Logo";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { registerUser, setSession } from "@/lib/use-auth";
 
 export default function RegisterPage() {
   const router = useRouter();
-  const [mounted, setMounted] = useState(false);
+  const mounted = useSyncExternalStore(() => () => {}, () => true, () => false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [securityCode, setSecurityCode] = useState("");
   const [error, setError] = useState("");
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -41,7 +38,7 @@ export default function RegisterPage() {
     <div className="flex min-h-screen items-center justify-center bg-[var(--color-bg-page)]">
       <div className="w-full max-w-md rounded-[var(--radius-xl)] bg-[var(--color-bg-surface)] p-10 shadow-[var(--shadow-lg)]">
         <div className="mb-6 flex flex-col items-center">
-          <Image src="/LmindLogo.svg" alt="Lmind Logo" width={48} height={48} className="mb-3" />
+        <Logo size={48} className="mb-3" />
           <h1 className="text-title-xl text-[var(--color-text-primary)]">注册 Lmind</h1>
         </div>
         <form onSubmit={handleSubmit} className="flex flex-col gap-5">
